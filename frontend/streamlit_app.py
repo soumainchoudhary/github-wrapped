@@ -77,7 +77,7 @@ st.markdown(
     }}
     
     [data-testid="stHeader"] {{
-        background-color: transparent !important;
+        display: none !important;
     }}
     
     [data-testid="stSidebar"] {{
