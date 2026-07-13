@@ -80,6 +80,16 @@ st.markdown(
         display: none !important;
     }}
     
+    footer {{
+        visibility: hidden !important;
+        display: none !important;
+    }}
+    
+    [data-testid="stViewerBadge"] {{
+        display: none !important;
+        visibility: hidden !important;
+    }}
+    
     [data-testid="stSidebar"] {{
         background: rgba(18, 18, 18, 0.4) !important;
         backdrop-filter: blur(20px) !important;
