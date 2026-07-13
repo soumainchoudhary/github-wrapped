@@ -135,53 +135,23 @@ async def fetch_user_events(
     return events
 
 
-async def fetch_repo_languages(
-    client: httpx.AsyncClient,
-    owner: str,
-    repo: str,
-    token: Optional[str] = None,
-) -> dict[str, int]:
-    """GET /repos/{owner}/{repo}/languages — returns {lang: bytes}."""
-    resp = await client.get(
-        f"{GITHUB_REST}/repos/{owner}/{repo}/languages",
-        headers=_headers(token),
-    )
-    if resp.status_code != 200:
-        return {}
-    return resp.json()
-
-
-async def fetch_all_languages(
-    client: httpx.AsyncClient,
-    username: str,
+def extract_languages_from_repos(
     repos: list[dict[str, Any]],
-    token: Optional[str] = None,
 ) -> dict[str, int]:
     """
-    Fetch language breakdowns for every repo owned by `username`,
-    limiting concurrency to 10 concurrent requests to prevent abuse rate limits,
-    then aggregate into a global {lang: total_bytes} dict.
+    Extract language data from the repos list we already fetched.
+    Uses the `language` and `size` fields already present in each repo object,
+    avoiding separate API calls per repo and eliminating rate-limit issues.
     """
-    sem = asyncio.Semaphore(10)
-
-    async def sem_fetch(repo_name: str) -> dict[str, int]:
-        async with sem:
-            return await fetch_repo_languages(client, username, repo_name, token)
-
-    tasks = [
-        sem_fetch(r["name"])
-        for r in repos
-        if not r.get("fork", False)
-    ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
     totals: dict[str, int] = {}
-    for result in results:
-        if isinstance(result, Exception):
-            logger.warning("Language fetch failed: %s", result)
+    for r in repos:
+        if r.get("fork", False):
             continue
-        for lang, byte_count in result.items():
-            totals[lang] = totals.get(lang, 0) + byte_count
+        lang = r.get("language")
+        if lang:
+            # Use repo size in KB as a proxy for language bytes
+            size = r.get("size", 0) * 1024  # GitHub reports size in KB
+            totals[lang] = totals.get(lang, 0) + size
     return totals
 
 

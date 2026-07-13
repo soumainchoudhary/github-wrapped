@@ -51,13 +51,6 @@ def render_landing():
             key="input_username",
             help="Your public GitHub username.",
         )
-        token = st.text_input(
-            "GitHub PAT (optional)",
-            type="password",
-            placeholder="ghp_xxxxxxxxxxxx",
-            key="input_token",
-            help="A read-only PAT with `public_repo` scope unlocks contribution calendar data.",
-        )
         year = st.selectbox(
             "Year",
             options=list(range(2025, 2007, -1)),
@@ -81,7 +74,7 @@ def render_landing():
         unsafe_allow_html=True,
     )
 
-    return username, token, year, generate
+    return username, year, generate
 
 
 def render_commits_headline(stats: dict[str, Any]):

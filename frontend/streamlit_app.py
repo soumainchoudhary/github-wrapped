@@ -346,13 +346,11 @@ def get_total_slides():
     return 4 if st.session_state.mode == "battle" else 12
 
 
-def _fetch_wrapped(username: str, token: str, year: int) -> dict | None:
+def _fetch_wrapped(username: str, year: int) -> dict | None:
     """Call the backend API synchronously (Streamlit doesn't natively support async)."""
     try:
         with httpx.Client(timeout=30.0) as client:
             payload = {"username": username, "year": year}
-            if token:
-                payload["github_token"] = token
 
             resp = client.post(f"{API_BASE}/api/wrapped", json=payload)
 
@@ -447,14 +445,14 @@ def main():
         st.session_state.mode = "battle" if "Versus" in mode_select else "solo"
 
         if st.session_state.mode == "solo":
-            username, token, year, generate = render_landing()
+            username, year, generate = render_landing()
 
             if generate:
                 if not username:
                     st.error("Please enter a GitHub username.")
                 else:
                     with st.spinner("🔍 Fetching your GitHub data..."):
-                        result = _fetch_wrapped(username, token, year)
+                        result = _fetch_wrapped(username, year)
                         if result:
                             st.session_state.stats = result
                             st.session_state.error = None
@@ -496,10 +494,10 @@ def main():
                 else:
                     with st.spinner(f"⚔️ Fetching profiles and stats..."):
                         st.session_state.error = None
-                        r1 = _fetch_wrapped(p1_username, None, year)
+                        r1 = _fetch_wrapped(p1_username, year)
                         r2 = None
                         if r1:
-                            r2 = _fetch_wrapped(p2_username, None, year)
+                            r2 = _fetch_wrapped(p2_username, year)
                             
                         if r1 and r2:
                             st.session_state.battle_stats_1 = r1

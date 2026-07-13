@@ -16,6 +16,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 
 from backend.app.core.cache import cache_key, get_cache
+from backend.app.core.config import settings
 from backend.app.core.security import limiter
 from backend.app.models.schemas import WrappedRequest, WrappedStats
 from backend.app.services import ai_service, github_service, image_service
@@ -42,56 +43,37 @@ async def generate_wrapped(request: Request, body: WrappedRequest):
         return cached
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            # 1. Fetch user profile
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # 1. Fetch user profile (unauthenticated)
             profile = await github_service.fetch_user_profile(
-                client, body.username, body.github_token
+                client, body.username
             )
 
-            # 2. Fetch all repos
+            # 2. Fetch all repos (unauthenticated, max 3 pages/300 repos)
             repos = await github_service.fetch_repos(
-                client, body.username, body.github_token
+                client, body.username, max_pages=3
             )
 
-            # 3. Fetch aggregated language bytes
-            lang_bytes = await github_service.fetch_all_languages(
-                client, body.username, repos, body.github_token
-            )
+            # 3. Extract language data from repos (zero extra API calls)
+            lang_bytes = github_service.extract_languages_from_repos(repos)
 
-            # 4. Fetch contribution calendar (requires PAT)
+            # 4. Scrape public contribution calendar (no token needed)
             contribution_collection = None
             contribution_days = []
-            if body.github_token:
-                try:
-                    contribution_collection = (
-                        await github_service.fetch_contribution_calendar(
-                            client, body.username, body.year, body.github_token
-                        )
-                    )
-                    contribution_days = github_service.parse_contribution_days(
-                        contribution_collection
-                    )
-                except Exception as exc:
-                    logger.warning(
-                        "GraphQL contribution fetch failed: %s", exc
-                    )
+            try:
+                contribution_days = await github_service.scrape_public_contribution_calendar(
+                    client, body.username, body.year
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Public contribution calendar scraping failed: %s", exc
+                )
 
-            # Fallback to public scraping if no token is provided or if GraphQL fails
-            if not contribution_days:
-                try:
-                    contribution_days = await github_service.scrape_public_contribution_calendar(
-                        client, body.username, body.year
-                    )
-                except Exception as exc:
-                    logger.warning(
-                        "Public contribution calendar scraping failed: %s", exc
-                    )
-
-            # 4.5. Fetch public events stream
+            # 5. Fetch public events stream (unauthenticated)
             events = []
             try:
                 events = await github_service.fetch_user_events(
-                    client, body.username, body.github_token
+                    client, body.username
                 )
             except Exception as exc:
                 logger.warning(
