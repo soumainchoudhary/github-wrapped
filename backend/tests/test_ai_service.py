@@ -2,7 +2,6 @@
 Unit tests for ai_service.py — focuses on the fallback logic.
 """
 
-import pytest
 
 from backend.app.models.schemas import LanguageBreakdown, WrappedStats
 from backend.app.services.ai_service import generate_personality_fallback

@@ -11,10 +11,7 @@ The card uses a glassmorphic visual style with:
 from __future__ import annotations
 
 import io
-import math
 import os
-import re
-from typing import Optional
 
 from PIL import Image, ImageDraw, ImageFont
 

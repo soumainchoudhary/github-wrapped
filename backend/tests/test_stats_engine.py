@@ -2,9 +2,8 @@
 Unit tests for stats_engine.py
 """
 
-from datetime import date, timedelta
+from datetime import date
 
-import pytest
 
 from backend.app.services.stats_engine import (
     compute_busiest_day,

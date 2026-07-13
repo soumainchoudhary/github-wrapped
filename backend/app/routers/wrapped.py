@@ -16,7 +16,6 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 
 from backend.app.core.cache import cache_key, get_cache
-from backend.app.core.config import settings
 from backend.app.core.security import limiter
 from backend.app.models.schemas import WrappedRequest, WrappedStats
 from backend.app.services import ai_service, github_service, image_service

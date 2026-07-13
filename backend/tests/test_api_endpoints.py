@@ -3,7 +3,6 @@ Integration tests for FastAPI routers, validation, and security headers.
 """
 
 from fastapi.testclient import TestClient
-import pytest
 
 from backend.app.main import app
 

@@ -10,7 +10,6 @@ Falls back gracefully when no PAT is provided (GraphQL is skipped).
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import date
 from typing import Any, Optional

@@ -34,7 +34,7 @@ async def generate_personality_hf(stats: WrappedStats) -> Optional[str]:
     if not settings.hf_api_token:
         return None
 
-    top_langs = ", ".join(l.name for l in stats.languages[:3]) or "unknown"
+    top_langs = ", ".join(lang.name for lang in stats.languages[:3]) or "unknown"
     prompt = (
         f"You are a witty coding personality analyst. "
         f"Given these GitHub stats for {stats.username}: "

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import calendar
 from collections import Counter
-from datetime import date, timedelta
 from typing import Any, Optional
 
 from backend.app.models.schemas import (
@@ -376,7 +375,7 @@ def calculate_external_contributions(events: list[dict[str, Any]], username: str
 
 def generate_markdown_readme(stats: WrappedStats) -> str:
     """Create a copy-pasteable Markdown summary of their Wrapped stats."""
-    top_languages_str = ", ".join(l.name for l in stats.languages[:3]) or "N/A"
+    top_languages_str = ", ".join(lang.name for lang in stats.languages[:3]) or "N/A"
     top_frameworks_str = ", ".join(stats.top_frameworks) or "N/A"
     
     markdown = f"""### 🎁 My GitHub Wrapped {stats.year}
