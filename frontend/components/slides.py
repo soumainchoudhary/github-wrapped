@@ -7,6 +7,7 @@ Each function renders one "slide" in the step-by-step reveal flow.
 from __future__ import annotations
 
 from typing import Any
+import html
 
 import streamlit as st
 
@@ -127,10 +128,11 @@ def render_languages(stats: dict[str, Any]):
         for lang in languages[:5]:
             color = lang.get("color", "#8b949e")
             pct = lang["percentage"]
+            lang_name = html.escape(str(lang.get('name', 'Unknown')))
             lang_html += f"""
             <div style="margin-bottom: 1.25rem;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-weight: 500; font-size: 1rem; color: #ffffff;">
-                    <span><span style="color: {color}; margin-right: 0.6rem; font-size: 1.1rem;">●</span>{lang['name']}</span>
+                    <span><span style="color: {color}; margin-right: 0.6rem; font-size: 1.1rem;">●</span>{lang_name}</span>
                     <span style="opacity: 0.85;">{pct}%</span>
                 </div>
                 <div style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.02);">
@@ -202,7 +204,7 @@ def render_personality(stats: dict[str, Any]):
         unsafe_allow_html=True,
     )
 
-    personality = stats.get("personality", "")
+    personality = html.escape(str(stats.get("personality", "")))
     if personality:
         st.markdown(
             f"""
@@ -219,14 +221,16 @@ def render_personality(stats: dict[str, Any]):
         st.warning("Personality text could not be generated.")
 
     if stats.get("top_repo_name"):
+        top_repo = html.escape(str(stats.get('top_repo_name', '')))
+        top_lang = html.escape(str(stats.get('top_repo_language', 'N/A')))
         st.markdown(
             f"""
             <div class="glass-card" style="text-align: center; padding: 1.5rem !important; max-width: 480px; margin: 1.25rem auto !important; border-color: rgba(255,255,255,0.06) !important;">
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; font-weight: 600;">🏆 Your crown jewel</p>
-                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">{stats['top_repo_name']}</h3>
+                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">{top_repo}</h3>
                 <p style="color: rgba(255, 255, 255, 0.6); font-size: 1.05rem; margin-top: 0.4rem; font-weight: 500;">
                     ⭐ {stats.get('top_repo_stars', 0):,} stars  •  
-                    <span>{stats.get('top_repo_language', 'N/A')}</span>
+                    <span>{top_lang}</span>
                 </p>
             </div>
             """,
@@ -246,10 +250,10 @@ def render_share(stats: dict[str, Any], api_base: str):
         unsafe_allow_html=True,
     )
 
-    username = stats.get("username", "")
+    username = html.escape(str(stats.get("username", "")))
     year = stats.get("year", 2025)
     image_url = f"{api_base}/api/wrapped/{username}/image?year={year}"
-    markdown_card = stats.get("markdown_readme", "")
+    markdown_card = html.escape(str(stats.get("markdown_readme", "")))
     share_html = f"""
     <div class="glass-card" style="text-align: center; max-width: 550px; margin: 1.5rem auto !important; padding: 2rem !important; border-color: rgba(255,255,255,0.06) !important;">
         <div style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.95;">🎴</div>
@@ -309,7 +313,7 @@ def render_chrono_type(stats: dict[str, Any]):
         unsafe_allow_html=True,
     )
     
-    chrono_name = stats.get("chrono_type", "Daylight Dev ☀️")
+    chrono_name = html.escape(str(stats.get("chrono_type", "Daylight Dev ☀️")))
     
     col1, col2 = st.columns([1, 1.2])
     
@@ -345,8 +349,8 @@ def render_coder_mood(stats: dict[str, Any]):
         unsafe_allow_html=True,
     )
 
-    mood = stats.get("coder_mood", "Zen Architect 🧘")
-    roast = stats.get("mood_roast", "No roast available.")
+    mood = html.escape(str(stats.get("coder_mood", "Zen Architect 🧘")))
+    roast = html.escape(str(stats.get("mood_roast", "No roast available.")))
 
     st.markdown(
         f"""
@@ -385,12 +389,15 @@ def render_battle_faceoff(p1: dict[str, Any], p2: dict[str, Any]):
 
     col1, col_vs, col2 = st.columns([1, 0.3, 1])
 
+    p1_user = html.escape(str(p1.get('username', '')))
+    p2_user = html.escape(str(p2.get('username', '')))
+
     with col1:
         st.markdown(
             f"""
             <div class="glass-card" style="text-align: center; padding: 2rem 1.5rem !important; border-color: rgba(56, 189, 248, 0.3) !important;">
                 <img src="{p1.get('avatar_url', '')}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 1rem;"/>
-                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p1['username']}</h3>
+                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p1_user}</h3>
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; margin-top: 0.25rem;">Joined {p1.get('account_created', 'N/A')[:10] if p1.get('account_created') else 'N/A'}</p>
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 1rem 0;"/>
                 <p style="color: #ffffff; font-size: 1.05rem; font-weight: 500;">📦 {p1['total_repos']} Repositories</p>
@@ -414,7 +421,7 @@ def render_battle_faceoff(p1: dict[str, Any], p2: dict[str, Any]):
             f"""
             <div class="glass-card" style="text-align: center; padding: 2rem 1.5rem !important; border-color: rgba(139, 92, 246, 0.3) !important;">
                 <img src="{p2.get('avatar_url', '')}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #8b5cf6; margin-bottom: 1rem;"/>
-                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p2['username']}</h3>
+                <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p2_user}</h3>
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; margin-top: 0.25rem;">Joined {p2.get('account_created', 'N/A')[:10] if p2.get('account_created') else 'N/A'}</p>
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 1rem 0;"/>
                 <p style="color: #ffffff; font-size: 1.05rem; font-weight: 500;">📦 {p2['total_repos']} Repositories</p>
@@ -500,12 +507,12 @@ def render_battle_verdict(p1: dict[str, Any], p2: dict[str, Any]):
             p2_score += 1
 
     if p1_score > p2_score:
-        winner_name = f"@{p1['username']}"
+        winner_name = html.escape(f"@{p1.get('username', '')}")
         winner_color = "#38bdf8"
         verdict_text = f"Winner by stats: {winner_name}! Their sheer keyboard muscle overcame the opponent."
         win_avatar = p1.get("avatar_url", "")
     elif p2_score > p1_score:
-        winner_name = f"@{p2['username']}"
+        winner_name = html.escape(f"@{p2.get('username', '')}")
         winner_color = "#8b5cf6"
         verdict_text = f"Winner by stats: {winner_name}! A dominating performance across the metrics."
         win_avatar = p2.get("avatar_url", "")
@@ -515,8 +522,8 @@ def render_battle_verdict(p1: dict[str, Any], p2: dict[str, Any]):
         verdict_text = "It's a dead tie! Both developers possess equal, legendary engineering powers."
         win_avatar = ""
 
-    p1_langs = [l["name"] for l in p1.get("languages", [])[:2]]
-    p2_langs = [l["name"] for l in p2.get("languages", [])[:2]]
+    p1_langs = [html.escape(str(l.get("name", ""))) for l in p1.get("languages", [])[:2]]
+    p2_langs = [html.escape(str(l.get("name", ""))) for l in p2.get("languages", [])[:2]]
     
     shared = set(p1_langs).intersection(set(p2_langs))
     if len(shared) >= 2:
@@ -530,6 +537,8 @@ def render_battle_verdict(p1: dict[str, Any], p2: dict[str, Any]):
         synergy_desc = "Opposite poles! You use completely distinct tech stacks. Dynamic but chaotic."
 
     col1, col2 = st.columns([1, 1.1])
+    p1_user = html.escape(str(p1.get('username', '')))
+    p2_user = html.escape(str(p2.get('username', '')))
     
     with col1:
         st.markdown(
@@ -558,8 +567,8 @@ def render_battle_verdict(p1: dict[str, Any], p2: dict[str, Any]):
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 0.5rem 0;"/>
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.8rem; margin-top: 0.25rem; line-height: 1.3;">
                     Top languages:<br/>
-                    <b>@{p1['username']}:</b> {", ".join(p1_langs)}<br/>
-                    <b>@{p2['username']}:</b> {", ".join(p2_langs)}
+                    <b>@{p1_user}:</b> {", ".join(p1_langs)}<br/>
+                    <b>@{p2_user}:</b> {", ".join(p2_langs)}
                 </p>
             </div>
             """,
@@ -597,9 +606,10 @@ def render_frameworks_stack(stats: dict[str, Any]):
         
         for idx, fw in enumerate(frameworks):
             grad, text_color = color_palette[idx % len(color_palette)]
+            fw_clean = html.escape(str(fw))
             tags_html += f"""
             <div style="background: {grad}; color: {text_color}; padding: 0.75rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 1.15rem; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; min-width: 120px;">
-                {fw}
+                {fw_clean}
             </div>
             """
         tags_html += "</div>"
@@ -610,7 +620,7 @@ def render_frameworks_stack(stats: dict[str, Any]):
             <div class="glass-card" style="border-color: rgba(255,255,255,0.06) !important; padding: 1.75rem !important; text-align: center; max-width: 550px; margin: 0 auto;">
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.95rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Stack Summary</p>
                 <p style="color: #ffffff; font-size: 1.15rem; line-height: 1.6; opacity: 0.9; margin: 0;">
-                    You integrated <b>{len(frameworks)}</b> major framework{"s" if len(frameworks) > 1 else ""} across your repositories, showcasing strong capabilities in {" & ".join(frameworks[:2])}.
+                    You integrated <b>{len(frameworks)}</b> major framework{"s" if len(frameworks) > 1 else ""} across your repositories, showcasing strong capabilities in {" & ".join([html.escape(str(f)) for f in frameworks[:2]])}.
                 </p>
             </div>
             """,
@@ -702,13 +712,14 @@ def render_habits_audit(stats: dict[str, Any]):
     if recommendations:
         rec_html = '<div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; margin-bottom: 2rem;">'
         for idx, rec in enumerate(recommendations):
+            rec_clean = html.escape(str(rec))
             rec_html += f"""
             <div class="glass-card" style="display: flex; align-items: flex-start; gap: 1rem; border-color: rgba(255,255,255,0.06) !important; padding: 1.25rem 1.5rem !important;">
                 <div style="background: rgba(255, 255, 255, 0.05); color: #ffffff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
                     {idx + 1}
                 </div>
                 <div style="color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.5; padding-top: 0.2rem;">
-                    {rec}
+                    {rec_clean}
                 </div>
             </div>
             """
