@@ -53,10 +53,13 @@ Enter any public GitHub username and get a stunning, slide-by-slide recap of you
                             └──────────────────────┘
 ```
 
-**Key design decisions:**
-- 🔓 **Zero authentication required** — all data is fetched from GitHub's public APIs and contribution pages
-- 🛡️ **XSS-hardened frontend** — all dynamic strings are `html.escape()`d before rendering
-- ⚡ **Optimized API calls** — repo languages extracted from list objects (no per-repo API calls), capped pagination
+**Key design decisions & Security Hardening:**
+- 🔓 **Zero authentication required** — all data is fetched from GitHub's public APIs and contribution pages.
+- 🛡️ **XSS-hardened frontend** — all dynamic strings (usernames, repository names, languages, roasts, and avatar URLs) are strictly sanitized via `html.escape()` before rendering inside Streamlit's custom HTML and markdown containers.
+- ⚡ **Optimized API calls** — repository languages are extracted from list objects (avoiding costly per-repository API queries), with query pagination capped to prevent resource exhaustion.
+- 🚦 **Proxy-Safe Rate Limiting** — the backend implements IP-based rate limiting (using `slowapi`) configured with a custom IP resolver to safely handle reverse proxies (Cloudflare/Render headers like `CF-Connecting-IP`, `X-Forwarded-For`).
+- 🧠 **Stateless by Design** — zero persistent storage is used. All computed stats are kept in an ephemeral in-memory cache with a short Time-To-Live (TTL).
+- 🔒 **Secure Headers** — the backend API enforces security headers including `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and `X-XSS-Protection`.
 
 ---
 

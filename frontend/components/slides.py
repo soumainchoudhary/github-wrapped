@@ -391,12 +391,14 @@ def render_battle_faceoff(p1: dict[str, Any], p2: dict[str, Any]):
 
     p1_user = html.escape(str(p1.get('username', '')))
     p2_user = html.escape(str(p2.get('username', '')))
+    p1_avatar = html.escape(str(p1.get('avatar_url', '')))
+    p2_avatar = html.escape(str(p2.get('avatar_url', '')))
 
     with col1:
         st.markdown(
             f"""
             <div class="glass-card" style="text-align: center; padding: 2rem 1.5rem !important; border-color: rgba(56, 189, 248, 0.3) !important;">
-                <img src="{p1.get('avatar_url', '')}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 1rem;"/>
+                <img src="{p1_avatar}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 1rem;"/>
                 <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p1_user}</h3>
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; margin-top: 0.25rem;">Joined {p1.get('account_created', 'N/A')[:10] if p1.get('account_created') else 'N/A'}</p>
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 1rem 0;"/>
@@ -420,7 +422,7 @@ def render_battle_faceoff(p1: dict[str, Any], p2: dict[str, Any]):
         st.markdown(
             f"""
             <div class="glass-card" style="text-align: center; padding: 2rem 1.5rem !important; border-color: rgba(139, 92, 246, 0.3) !important;">
-                <img src="{p2.get('avatar_url', '')}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #8b5cf6; margin-bottom: 1rem;"/>
+                <img src="{p2_avatar}" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #8b5cf6; margin-bottom: 1rem;"/>
                 <h3 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0;">@{p2_user}</h3>
                 <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; margin-top: 0.25rem;">Joined {p2.get('account_created', 'N/A')[:10] if p2.get('account_created') else 'N/A'}</p>
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 1rem 0;"/>
@@ -510,12 +512,12 @@ def render_battle_verdict(p1: dict[str, Any], p2: dict[str, Any]):
         winner_name = html.escape(f"@{p1.get('username', '')}")
         winner_color = "#38bdf8"
         verdict_text = f"Winner by stats: {winner_name}! Their sheer keyboard muscle overcame the opponent."
-        win_avatar = p1.get("avatar_url", "")
+        win_avatar = html.escape(str(p1.get("avatar_url", "")))
     elif p2_score > p1_score:
         winner_name = html.escape(f"@{p2.get('username', '')}")
         winner_color = "#8b5cf6"
         verdict_text = f"Winner by stats: {winner_name}! A dominating performance across the metrics."
-        win_avatar = p2.get("avatar_url", "")
+        win_avatar = html.escape(str(p2.get("avatar_url", "")))
     else:
         winner_name = "Draw!"
         winner_color = "#ffffff"
