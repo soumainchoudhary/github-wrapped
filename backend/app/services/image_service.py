@@ -99,21 +99,21 @@ def render_card(stats: WrappedStats) -> bytes:
     base_img = _get_background_image().convert("RGBA")
     
     # Apply a dark tint overlay directly to the background to ensure high readability
-    dark_tint = Image.new("RGBA", base_img.size, (10, 12, 18, 180)) # Very dark overlay
+    dark_tint = Image.new("RGBA", base_img.size, (10, 12, 18, 180))
     base_img = Image.alpha_composite(base_img, dark_tint)
     
     # 2. Overlay container for alpha drawing
     overlay = Image.new("RGBA", base_img.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     
-    # 3. Load Fonts
-    font_title = _get_font(56, bold=True)
-    font_subtitle = _get_font(32, bold=True)
-    font_stat_big = _get_font(64, bold=True)
-    font_stat_label = _get_font(24)
-    font_body = _get_font(26)
-    font_brand = _get_font(22)
-    font_lang = _get_font(24)
+    # 3. Load Fonts — large enough to be readable when scaled to mobile
+    font_title = _get_font(80, bold=True)
+    font_subtitle = _get_font(48, bold=True)
+    font_stat_big = _get_font(88, bold=True)
+    font_stat_label = _get_font(32)
+    font_body = _get_font(36)
+    font_brand = _get_font(30)
+    font_lang = _get_font(34)
 
     # ── Main Card Border Container ──────────────────────────────────
     draw.rounded_rectangle(
@@ -125,26 +125,26 @@ def render_card(stats: WrappedStats) -> bytes:
     )
 
     # ── Avatar Circle ───────────────────────────────────────────────
-    avatar_cx, avatar_cy = 540, 140
-    avatar_r = 60
+    avatar_cx, avatar_cy = 540, 150
+    avatar_r = 75
     draw.ellipse(
         (avatar_cx - avatar_r, avatar_cy - avatar_r,
          avatar_cx + avatar_r, avatar_cy + avatar_r),
         fill=(ACCENT[0], ACCENT[1], ACCENT[2], 200),
         outline=(255, 255, 255, 80),
-        width=2
+        width=3
     )
     initials = clean_text_for_pillow(stats.username[:2].upper())
     draw.text(
         (avatar_cx, avatar_cy),
         initials,
         fill=TEXT_PRIMARY,
-        font=_get_font(34, bold=True),
+        font=_get_font(44, bold=True),
         anchor="mm"
     )
 
     # ── Header text ────────────────────────────────────────────────
-    y = 225
+    y = 250
     draw.text(
         (540, y),
         f"@{clean_text_for_pillow(stats.username)}",
@@ -152,7 +152,7 @@ def render_card(stats: WrappedStats) -> bytes:
         font=font_title,
         anchor="mt"
     )
-    y += 72
+    y += 100
     draw.text(
         (540, y),
         f"GitHub Wrapped {stats.year}",
@@ -161,10 +161,10 @@ def render_card(stats: WrappedStats) -> bytes:
         anchor="mt"
     )
 
-    # ── Stats Grid Container (Increased spacing to prevent overlapping) ──
-    y += 85
+    # ── Stats Grid Container ─────────────────────────────────────
+    y += 100
     draw.rounded_rectangle(
-        (60, y - 15, CARD_WIDTH - 60, y + 285),
+        (60, y - 15, CARD_WIDTH - 60, y + 370),
         radius=18,
         fill=PANEL_BG,
         outline=PANEL_BORDER,
@@ -185,68 +185,68 @@ def render_card(stats: WrappedStats) -> bytes:
         row = i // 3
         col = i % 3
         cx = cols[col]
-        cy = y + 10 + row * 140  # Spacing for larger fonts
-        
+        cy = y + 20 + row * 185
+
         # Draw value
         draw.text((cx, cy), val, fill=TEXT_PRIMARY, font=font_stat_big, anchor="mt")
         # Draw label
-        draw.text((cx, cy + 72), label, fill=TEXT_SECONDARY, font=font_stat_label, anchor="mt")
+        draw.text((cx, cy + 95), label, fill=TEXT_SECONDARY, font=font_stat_label, anchor="mt")
 
     # ── Languages Section ──────────────────────────────────────────
-    y += 340  # Pushed down to clear the taller stats panel
+    y += 430
     draw.text(
         (80, y),
         "Languages Stack",
         fill=TEXT_PRIMARY,
         font=font_subtitle
     )
-    y += 55
+    y += 70
 
     for i, lang in enumerate(stats.languages[:5]):
         lx = 100
-        ly = y + i * 46
+        ly = y + i * 58
         
-        # Color dot
+        # Color dot (larger)
         dot_color = LANG_COLORS.get(lang.name, (139, 148, 158))
         draw.ellipse(
-            (lx, ly + 4, lx + 14, ly + 18),
+            (lx, ly + 6, lx + 22, ly + 28),
             fill=(dot_color[0], dot_color[1], dot_color[2], 255)
         )
         # Text name
         draw.text(
-            (lx + 24, ly),
+            (lx + 34, ly),
             f"{clean_text_for_pillow(lang.name)}",
             fill=TEXT_PRIMARY,
             font=font_lang
         )
         # Percentage
         draw.text(
-            (400, ly),
+            (440, ly),
             f"{lang.percentage}%",
             fill=TEXT_SECONDARY,
             font=font_lang
         )
-        # Bar track
-        bar_x = 480
-        bar_w = 480
+        # Bar track (taller)
+        bar_x = 530
+        bar_w = 430
         draw.rounded_rectangle(
-            (bar_x, ly + 4, bar_x + bar_w, ly + 18),
-            radius=7,
+            (bar_x, ly + 6, bar_x + bar_w, ly + 28),
+            radius=11,
             fill=(255, 255, 255, 15)
         )
         # Bar fill
         bar_fill = int(bar_w * lang.percentage / 100)
         if bar_fill > 2:
             draw.rounded_rectangle(
-                (bar_x, ly + 4, bar_x + bar_fill, ly + 18),
-                radius=7,
+                (bar_x, ly + 6, bar_x + bar_fill, ly + 28),
+                radius=11,
                 fill=(dot_color[0], dot_color[1], dot_color[2], 230)
             )
 
-    # ── Activity Highlights Card (Cleaned of Emoji boxes) ──────────
-    y += 275
+    # ── Activity Highlights Card ─────────────────────────────────
+    y += 340
     draw.rounded_rectangle(
-        (60, y, CARD_WIDTH - 60, y + 100),
+        (60, y, CARD_WIDTH - 60, y + 130),
         radius=18,
         fill=PANEL_BG,
         outline=PANEL_BORDER,
@@ -254,13 +254,13 @@ def render_card(stats: WrappedStats) -> bytes:
     )
 
     draw.text(
-        (90, y + 16),
+        (90, y + 18),
         f"Busiest Day: {stats.busiest_day_of_week}",
         fill=TEXT_PRIMARY,
         font=font_body
     )
     draw.text(
-        (90, y + 48),
+        (90, y + 68),
         f"Busiest Month: {stats.busiest_month}",
         fill=TEXT_PRIMARY,
         font=font_body
@@ -269,24 +269,24 @@ def render_card(stats: WrappedStats) -> bytes:
     if stats.top_repo_name:
         repo_name_clean = clean_text_for_pillow(stats.top_repo_name)
         draw.text(
-            (560, y + 16),
+            (560, y + 18),
             f"Top Repo: {repo_name_clean}",
             fill=TEXT_PRIMARY,
             font=font_body
         )
         draw.text(
-            (560, y + 48),
-            f"{stats.top_repo_stars} stars  •  {stats.top_repo_language}",
+            (560, y + 68),
+            f"{stats.top_repo_stars} stars  |  {stats.top_repo_language}",
             fill=TEXT_SECONDARY,
             font=font_body
         )
 
-    # ── Personality Card (Cleaned of Emojis to prevent box errors) ──
-    y += 140
+    # ── Personality Card ─────────────────────────────────────────
+    y += 175
     draw.rounded_rectangle(
-        (60, y, CARD_WIDTH - 60, y + 140),
+        (60, y, CARD_WIDTH - 60, y + 180),
         radius=18,
-        fill=(139, 92, 246, 25), # Subtle translucent purple
+        fill=(139, 92, 246, 25),
         outline=(139, 92, 246, 80),
         width=1
     )
@@ -295,13 +295,13 @@ def render_card(stats: WrappedStats) -> bytes:
     personality_clean = clean_text_for_pillow(personality)
     _draw_wrapped_text(
         draw, personality_clean, font_body, TEXT_PRIMARY,
-        x=90, y=y + 18, max_width=CARD_WIDTH - 180
+        x=90, y=y + 22, max_width=CARD_WIDTH - 180
     )
 
     # ── Brand Footer ────────────────────────────────────────────────
     draw.text(
-        (540, CARD_HEIGHT - 65),
-        "github-wrapped  •  Share your year in code",
+        (540, CARD_HEIGHT - 75),
+        "github-wrapped  |  Share your year in code",
         fill=TEXT_SECONDARY,
         font=font_brand,
         anchor="mt"
@@ -326,7 +326,7 @@ def _draw_wrapped_text(
     x: int,
     y: int,
     max_width: int,
-    line_spacing: int = 6,
+    line_spacing: int = 8,
 ) -> None:
     """Helper to draw wrapped lines of text on the canvas."""
     words = text.split()
