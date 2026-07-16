@@ -19,7 +19,7 @@ from backend.app.models.schemas import WrappedStats
 
 # ── Dimensions and Glassmorphic Theme Color Palette ────────────────────────
 CARD_WIDTH = 1080
-CARD_HEIGHT = 1350
+CARD_HEIGHT = 1620
 
 # Glass panel fills and borders (with alpha)
 GLASS_BG = (10, 12, 18, 215)       # Darker translucent card fill for high contrast
@@ -107,13 +107,13 @@ def render_card(stats: WrappedStats) -> bytes:
     draw = ImageDraw.Draw(overlay)
     
     # 3. Load Fonts
-    font_title = _get_font(44, bold=True)
-    font_subtitle = _get_font(26, bold=True)
-    font_stat_big = _get_font(52, bold=True)
-    font_stat_label = _get_font(18)
-    font_body = _get_font(21)
-    font_brand = _get_font(16)
-    font_lang = _get_font(18)
+    font_title = _get_font(56, bold=True)
+    font_subtitle = _get_font(32, bold=True)
+    font_stat_big = _get_font(64, bold=True)
+    font_stat_label = _get_font(24)
+    font_body = _get_font(26)
+    font_brand = _get_font(22)
+    font_lang = _get_font(24)
 
     # ── Main Card Border Container ──────────────────────────────────
     draw.rounded_rectangle(
@@ -125,8 +125,8 @@ def render_card(stats: WrappedStats) -> bytes:
     )
 
     # ── Avatar Circle ───────────────────────────────────────────────
-    avatar_cx, avatar_cy = 540, 130
-    avatar_r = 50
+    avatar_cx, avatar_cy = 540, 140
+    avatar_r = 60
     draw.ellipse(
         (avatar_cx - avatar_r, avatar_cy - avatar_r,
          avatar_cx + avatar_r, avatar_cy + avatar_r),
@@ -139,12 +139,12 @@ def render_card(stats: WrappedStats) -> bytes:
         (avatar_cx, avatar_cy),
         initials,
         fill=TEXT_PRIMARY,
-        font=_get_font(28, bold=True),
+        font=_get_font(34, bold=True),
         anchor="mm"
     )
 
     # ── Header text ────────────────────────────────────────────────
-    y = 200
+    y = 225
     draw.text(
         (540, y),
         f"@{clean_text_for_pillow(stats.username)}",
@@ -152,7 +152,7 @@ def render_card(stats: WrappedStats) -> bytes:
         font=font_title,
         anchor="mt"
     )
-    y += 58
+    y += 72
     draw.text(
         (540, y),
         f"GitHub Wrapped {stats.year}",
@@ -162,9 +162,9 @@ def render_card(stats: WrappedStats) -> bytes:
     )
 
     # ── Stats Grid Container (Increased spacing to prevent overlapping) ──
-    y += 75
+    y += 85
     draw.rounded_rectangle(
-        (60, y - 15, CARD_WIDTH - 60, y + 235),
+        (60, y - 15, CARD_WIDTH - 60, y + 285),
         radius=18,
         fill=PANEL_BG,
         outline=PANEL_BORDER,
@@ -185,26 +185,26 @@ def render_card(stats: WrappedStats) -> bytes:
         row = i // 3
         col = i % 3
         cx = cols[col]
-        cy = y + 10 + row * 120  # Spacing increased from 90 to 120 to completely clear values & labels
+        cy = y + 10 + row * 140  # Spacing for larger fonts
         
         # Draw value
         draw.text((cx, cy), val, fill=TEXT_PRIMARY, font=font_stat_big, anchor="mt")
         # Draw label
-        draw.text((cx, cy + 58), label, fill=TEXT_SECONDARY, font=font_stat_label, anchor="mt")
+        draw.text((cx, cy + 72), label, fill=TEXT_SECONDARY, font=font_stat_label, anchor="mt")
 
     # ── Languages Section ──────────────────────────────────────────
-    y += 285  # Pushed down to clear the taller stats panel
+    y += 340  # Pushed down to clear the taller stats panel
     draw.text(
         (80, y),
         "Languages Stack",
         fill=TEXT_PRIMARY,
         font=font_subtitle
     )
-    y += 45
+    y += 55
 
     for i, lang in enumerate(stats.languages[:5]):
         lx = 100
-        ly = y + i * 36
+        ly = y + i * 46
         
         # Color dot
         dot_color = LANG_COLORS.get(lang.name, (139, 148, 158))
@@ -244,9 +244,9 @@ def render_card(stats: WrappedStats) -> bytes:
             )
 
     # ── Activity Highlights Card (Cleaned of Emoji boxes) ──────────
-    y += 215
+    y += 275
     draw.rounded_rectangle(
-        (60, y, CARD_WIDTH - 60, y + 85),
+        (60, y, CARD_WIDTH - 60, y + 100),
         radius=18,
         fill=PANEL_BG,
         outline=PANEL_BORDER,
@@ -282,9 +282,9 @@ def render_card(stats: WrappedStats) -> bytes:
         )
 
     # ── Personality Card (Cleaned of Emojis to prevent box errors) ──
-    y += 125
+    y += 140
     draw.rounded_rectangle(
-        (60, y, CARD_WIDTH - 60, y + 120),
+        (60, y, CARD_WIDTH - 60, y + 140),
         radius=18,
         fill=(139, 92, 246, 25), # Subtle translucent purple
         outline=(139, 92, 246, 80),
